@@ -64,4 +64,6 @@ def create_BOW_environment():
     vectorizer = TfidfVectorizer()
     X = vectorizer.fit_transform(sentences)
 
+
+
     return vectorizer, speller, stop_words, ps

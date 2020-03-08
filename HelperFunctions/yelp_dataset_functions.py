@@ -46,6 +46,7 @@ def create_labeled_review_dataset_from_source():
     print(total_lines)
 
 
+
 def create_labeled_fake_and_true_review_dataset_from_source():
     metadata_file = open('../Reviews/Yelp_Dataset/yelpzip/metadata', newline='', encoding="utf8")
     review_file = open('../Reviews/Yelp_Dataset/yelpzip/reviewContent', newline='', encoding="utf8")

@@ -1,6 +1,7 @@
 from sklearn.model_selection import train_test_split
 from HelperFunctions import yelp_dataset_functions as yelp
 from FeatureExtraction import bag_of_words as bow
+from FeatureSets import information_gain as IG
 import numpy as np
 from sklearn import svm, metrics, preprocessing
 import nltk
@@ -8,10 +9,16 @@ import nltk
 save_features_and_labels = False
 create_new_Samples = True
 sample_amount = 1
-sample_size = 1000
+sample_size = 100
 if create_new_Samples:
     print("creating " + str(sample_amount) + " balanced samples of size " + str(sample_size))
     yelp.create_balanced_samples(sample_amount, sample_size)
+
+# TEST IG STUFF
+IG.test_random_stuff()
+
+
+
 
 # Load dataset here.
 # data in the shape of an array of features. [[features_sample1],[features_sample2], etc]
@@ -22,6 +29,12 @@ sample_reader = yelp.get_balanced_sample_reader(use_sample)
 print("Done creating samples, initializing BOW environment")
 vectorizer, speller, stop_words, ps = bow.create_BOW_environment()
 print("Environment intialized!")
+
+
+## Testing
+print("TESTING VECTORIZER: ")
+print(vectorizer)
+
 
 print("Creating the feature and label arrays")
 X = np.zeros((sample_size, len(vectorizer.get_feature_names())))
