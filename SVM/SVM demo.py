@@ -58,17 +58,50 @@ print("Finished split, starting learning process")
 
 # Linear Kernel
 clf = svm.SVC(kernel='linear', C=1).fit(X_train, y_train)
+print("clf using linear kernel done")
+rbfK = svm.SVC(kernel='rbf', C=1).fit(X_train, y_train)
+print("clf using rbf kernel done ")
+sigm = svm.SVC(kernel='sigmoid', C=1).fit(X_train, y_train)
+print("clf using sigmoid kernel done ")
+# polyn = svm.SVC(kernel='polynomial', C=1).fit(X_train, y_train)
+# print("clf using polynomial kernel done ")
 
-print("Finished learning, making predictions now")
+print("-----Finished learning, making predictions now")
+
+
+##### PREDICTION USING LINEAR KERNEL
 
 # Predict the response for test dataset
 y_pred = clf.predict(X_test)
 
 # Model Accuracy: how often is the classifier correct?
-print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
+print("Accuracy linear kernel:", metrics.accuracy_score(y_test, y_pred))
 
 # Model Precision: what percentage of positive tuples are labeled as such?
-print("Precision:", metrics.precision_score(y_test, y_pred))
+print("Precision linear kernel:", metrics.precision_score(y_test, y_pred))
 
 # Model Recall: what percentage of positive tuples are labelled as such?
-print("Recall:", metrics.recall_score(y_test, y_pred))
+print("Recall linear kernel:", metrics.recall_score(y_test, y_pred))
+print("--------------------")
+
+
+
+##### PREDICTIONS USING RBF
+r_pred = rbfK.predict(X_test)
+print("Accuracy rbf kernel:", metrics.accuracy_score(y_test, r_pred))
+print("Precision rbf kernel:", metrics.precision_score(y_test, r_pred))
+print("Recall rbf kernel:", metrics.recall_score(y_test, r_pred))
+print("--------------------")
+
+##### PREDICTIONS USING SIGMOID
+s_pred = sigm.predict(X_test)
+print("Accuracy signmoid kernel:", metrics.accuracy_score(y_test, s_pred))
+print("Precision sigmoid kernel:", metrics.precision_score(y_test, s_pred))
+print("Recall sigmoid kernel:", metrics.recall_score(y_test, s_pred))
+print("--------------------")
+
+##### PREDICTIONS USING POLYNOMIMAL
+# p_pred = polyn.predict(X_test)
+# print("Accuracy polynomial kernel:", metrics.accuracy_score(y_test, p_pred))
+# print("Precision polynomial kernel:", metrics.precision_score(y_test, p_pred))
+# print("Recall polynomial kernel:", metrics.recall_score(y_test, p_pred))
