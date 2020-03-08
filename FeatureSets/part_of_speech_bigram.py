@@ -23,17 +23,17 @@ def train_and_get_bigram_tagger():
     return bigram_tagger
 
 
-def get_bigrams_and_POS_tags_of_text(text, tagger):
-    text = text.replace(",", "").replace(".", "").replace("-", " ").replace("=", " ")
-    tagged_bigrams = tagger.tag(word_tokenize(text))
+def get_bigrams_and_POS_tags_of_sentence(sentence, tagger):
+    sentence = sentence.replace(",", "").replace(".", "").replace("-", " ").replace("=", " ")
+    tagged_bigrams = tagger.tag(word_tokenize(sentence))
 
-    res = []
+    res = ''
     previous_word, previous_tag = '', ''
     for word, pos_tag in tagged_bigrams:
         if previous_word == '':
             previous_word, previous_tag = word, pos_tag
         else:
-            res.append(previous_word + "_" + previous_tag + "_" + word + "_" + pos_tag)
+            res += previous_word + "_" + previous_tag + "_" + word + "_" + pos_tag + ' '
             previous_word, previous_tag = word, pos_tag
 
     return res

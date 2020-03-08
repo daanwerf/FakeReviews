@@ -3,16 +3,24 @@ from symspellpy.symspellpy import SymSpell, Verbosity
 from HelperFunctions import yelp_dataset_functions as yelp
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
+from FeatureSets import part_of_speech_bigram as bipos
 
 
-def make_sentence_array(reader, speller, stop_words, ps):
+def make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess):
     sentences = []
     label, review_text = yelp.get_next_review_and_label(reader)
     while label != "-1":
-        sentences.append(sanitize_sentence(review_text, speller, stop_words, ps))
+        sanitized_sentence = sanitize_sentence(review_text, speller, stop_words, ps, preprocess)
+
+        if preprocess['unigram']:
+            sentences.append(sanitized_sentence)
+        elif preprocess['bipos']:
+            sentences.append(bipos.get_bigrams_and_POS_tags_of_sentence(sanitized_sentence, tagger))
+
         label, review_text = yelp.get_next_review_and_label(reader)
 
     return sentences
+
 
 # Report: too high max distance -> too large change in words.
 def get_words_from_symspell_lookup(sentence, speller):
@@ -32,34 +40,54 @@ def get_words_from_symspell_lookup(sentence, speller):
 
 
 # Report: 500 reviews: with sanitizing: 3001, without: 4459
-def sanitize_sentence(sentence, speller, stop_words, ps):
+def sanitize_sentence(sentence, speller, stop_words, ps, preprocess):
     sentence = sentence.translate(str.maketrans('', '', r"""!"#$%&()*+,-./:;<=>?@[\]^_`{|}~""")).lower()
 
     sentence = ' '.join([w for w in sentence.split() if len(w) > 2])
     sentence = ' '.join(s for s in sentence.split() if not any(c.isdigit() for c in s))
-    sentence = ' '.join(s for s in sentence.split() if s not in stop_words)
+
+    if preprocess['stop_words']:
+        sentence = ' '.join(s for s in sentence.split() if s not in stop_words)
 
     # Report: pyspellchecker too slow
-    sentence = get_words_from_symspell_lookup(sentence, speller)
+    if preprocess['spell_checker']:
+        sentence = get_words_from_symspell_lookup(sentence, speller)
 
-    stemmed_sentence = ""
-    for word_to_stem in sentence.split():
-        stemmed_sentence = stemmed_sentence + " " + ps.stem(word_to_stem)
+    if preprocess['stemmer']:
+        stemmed_sentence = ""
+        for word_to_stem in sentence.split():
+            stemmed_sentence = stemmed_sentence + " " + ps.stem(word_to_stem)
+        sentence = stemmed_sentence
 
-    return stemmed_sentence
+    return sentence
 
 
-def create_BOW_environment():
-    speller = SymSpell(max_dictionary_edit_distance=4)
-    dictionary_path = "../dictionaries/frequency_dictionary_en_82_765.txt"
-    speller.load_dictionary(dictionary_path, 0, 1)
+def create_BOW_environment(preprocess, use_sample):
+    speller = None
+    if preprocess['spell_checker']:
+        print("Loading speller dictionary")
+        speller = SymSpell(max_dictionary_edit_distance=4)
+        dictionary_path = "../dictionaries/frequency_dictionary_en_82_765.txt"
+        speller.load_dictionary(dictionary_path, 0, 1)
 
-    ps = PorterStemmer()
-    stop_words = set(stopwords.words('english'))
+    ps = None
+    if preprocess['stemmer']:
+        print("Loading stemmer")
+        ps = PorterStemmer()
 
-    reader = yelp.get_balanced_sample_reader(0)
+    stop_words = None
+    if preprocess['stop_words']:
+        print("Loading stop words")
+        stop_words = set(stopwords.words('english'))
 
-    sentences = make_sentence_array(reader, speller, stop_words, ps)
+    tagger = None
+    if preprocess['bipos']:
+        print("Loading and training tagger")
+        tagger = bipos.train_and_get_bigram_tagger()
+
+    reader = yelp.get_balanced_sample_reader(use_sample)
+
+    sentences = make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess)
     reader.close()
     vectorizer = TfidfVectorizer()
     X = vectorizer.fit_transform(sentences)

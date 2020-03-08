@@ -4,34 +4,62 @@ from FeatureExtraction import bag_of_words as bow
 import numpy as np
 from sklearn import svm, metrics, preprocessing
 
+def make_preprocess_decision_dict(use_feature_set):
+    preprocess = {
+        'stop_words': False,
+        'spell_checker': False,
+        'stemmer': False,
+        'unigram': False,
+        'bigram': False,
+        'unipos': False,
+        'bipos': False
+    }
 
-def execute_SVM_process(use_feature_set, create_new_Samples = False, save_features_and_labels = False, sample_amount = 1,
+    if use_feature_set == "unigram":
+        preprocess['stop_words'] = True
+        preprocess['spell_checker'] = True
+        preprocess['stemmer'] = True
+        preprocess['unigram'] = True
+    elif use_feature_set == "bigram":
+        preprocess['stop_words']: True
+        preprocess['spell_checker'] = True
+        preprocess['stemmer'] = True
+        preprocess['bigram'] = True
+    elif use_feature_set == "unipos":
+        preprocess['stop_words']: True
+        preprocess['spell_checker'] = True
+        preprocess['stemmer'] = True
+        preprocess['unipos'] = True
+    elif use_feature_set == "bipos":
+        preprocess['stop_words']: True
+        preprocess['spell_checker'] = True
+        preprocess['stemmer'] = False
+        preprocess['bipos'] = True
+
+    return preprocess
+
+
+def execute_SVM_process(use_feature_set, create_new_Samples = False, save_features_and_labels = False, new_sample_amount = 1,
                         sample_size = 1000, use_sample = 0):
     if create_new_Samples:
-        print("creating " + str(sample_amount) + " balanced samples of size " + str(sample_size))
-        yelp.create_balanced_samples(sample_amount, sample_size)
+        print("creating " + str(new_sample_amount) + " balanced samples of size " + str(sample_size))
+        yelp.create_balanced_samples(new_sample_amount, sample_size)
+
 
     # Load dataset here.
     # data in the shape of an array of features. [[features_sample1],[features_sample2], etc]
     # target in the shape of [1 0 1 1 0 1] where 1 corresponds with the first sample.
-    print("Reading sample number " + str(use_sample))
+    print("Reading sample file number " + str(use_sample))
     use_sample = 0
     sample_reader = yelp.get_balanced_sample_reader(use_sample)
 
-    print("Creating feature sets")
-
-
-
-
-
-
-    print("Done creating samples, initializing BOW environment")
-    vectorizer, speller, stop_words, ps = bow.create_BOW_environment()
+    print("Initializing BOW environment for " + str(use_feature_set))
+    preprocess = make_preprocess_decision_dict(use_feature_set)
+    vectorizer, speller, stop_words, ps = bow.create_BOW_environment(preprocess, use_sample)
     print("Environment intialized!")
 
     print("Creating the feature and label arrays")
     X = np.zeros((sample_size, len(vectorizer.get_feature_names())))
-    print("X intended shape: " + str(np.shape(X)))
     y = []
 
     label, review = yelp.get_next_review_and_label(sample_reader)
@@ -40,7 +68,7 @@ def execute_SVM_process(use_feature_set, create_new_Samples = False, save_featur
     # Report: matrix addition waaaaaaaayyy faster than appending
     while label != "-1":
         y.append(int(label))
-        X[counter] = X[counter] + vectorizer.transform([bow.sanitize_sentence(review, speller, stop_words, ps)])
+        X[counter] = X[counter] + vectorizer.transform([bow.sanitize_sentence(review, speller, stop_words, ps, preprocess)])
         label, review = yelp.get_next_review_and_label(sample_reader)
         print("Progress: " + str((counter/sample_size) * 100))
         counter += 1
@@ -76,3 +104,6 @@ def execute_SVM_process(use_feature_set, create_new_Samples = False, save_featur
 
     # Model Recall: what percentage of positive tuples are labelled as such?
     print("Recall:", metrics.recall_score(y_test, y_pred))
+
+
+execute_SVM_process('bipos')
