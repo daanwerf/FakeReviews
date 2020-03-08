@@ -2,7 +2,8 @@ from sklearn.model_selection import train_test_split
 from HelperFunctions import yelp_dataset_functions as yelp
 from FeatureExtraction import bag_of_words as bow
 import numpy as np
-from sklearn import svm, metrics, preprocessing
+from sklearn import svm, metrics
+from sklearn.model_selection import cross_val_predict, cross_val_score
 
 def make_preprocess_decision_dict(use_feature_set):
     preprocess = {
@@ -18,7 +19,7 @@ def make_preprocess_decision_dict(use_feature_set):
     if use_feature_set == "unigram":
         preprocess['stop_words'] = True
         preprocess['spell_checker'] = True
-        preprocess['stemmer'] = True
+        preprocess['stemmer'] = False
         preprocess['unigram'] = True
     elif use_feature_set == "bigram":
         preprocess['stop_words']: True
@@ -70,7 +71,7 @@ def execute_SVM_process(use_feature_set, create_new_Samples = False, save_featur
         y.append(int(label))
         X[counter] = X[counter] + vectorizer.transform([bow.sanitize_sentence(review, speller, stop_words, ps, preprocess)])
         label, review = yelp.get_next_review_and_label(sample_reader)
-        print("Progress: " + str((counter/sample_size) * 100))
+        print("Progress: " + str((counter/sample_size) * 100) + "%")
         counter += 1
 
     if save_features_and_labels:
@@ -88,22 +89,19 @@ def execute_SVM_process(use_feature_set, create_new_Samples = False, save_featur
 
     print("Finished split, starting learning process")
 
-    # Linear Kernel
+    # 5-fold cross validation, Linear Kernel
     clf = svm.SVC(kernel='linear', C=1).fit(X_train, y_train)
 
-    print("Finished learning, making predictions now")
+    print("Done learning, calculating metrics now")
 
-    # Predict the response for test dataset
-    y_pred = clf.predict(X_test)
-
-    # Model Accuracy: how often is the classifier correct?
-    print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
-
-    # Model Precision: what percentage of positive tuples are labeled as such?
-    print("Precision:", metrics.precision_score(y_test, y_pred))
-
-    # Model Recall: what percentage of positive tuples are labelled as such?
-    print("Recall:", metrics.recall_score(y_test, y_pred))
+    accuracies = cross_val_score(clf, X, y, cv=5, scoring='accuracy')
+    print("5-fold accuracies: " + str(accuracies) + " average: " + str(sum(accuracies) / len(accuracies)))
+    precisions = cross_val_score(clf, X, y, cv=5, scoring='precision')
+    print("5-fold precisions: " + str(precisions) + " average: " + str(sum(precisions) / len(precisions)))
+    recalls = cross_val_score(clf, X, y, cv=5, scoring='recall')
+    print("5-fold recalls: " + str(recalls) + " average: " + str(sum(recalls) / len(recalls)))
+    f1s = cross_val_score(clf, X, y, cv=5, scoring='f1')
+    print("5-fold f1-scores: " + str(f1s) + " average: " + str(sum(f1s) / len(f1s)))
 
 
 execute_SVM_process('bipos')

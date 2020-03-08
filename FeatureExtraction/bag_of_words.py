@@ -5,7 +5,7 @@ from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from FeatureSets import part_of_speech_bigram as bipos
 
-
+# Report: struggles with getting good bipos features
 def make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess):
     sentences = []
     label, review_text = yelp.get_next_review_and_label(reader)
@@ -66,7 +66,7 @@ def create_BOW_environment(preprocess, use_sample):
     speller = None
     if preprocess['spell_checker']:
         print("Loading speller dictionary")
-        speller = SymSpell(max_dictionary_edit_distance=4)
+        speller = SymSpell()
         dictionary_path = "../dictionaries/frequency_dictionary_en_82_765.txt"
         speller.load_dictionary(dictionary_path, 0, 1)
 
