@@ -44,7 +44,7 @@ def get_bigrams_and_POS_tags_of_sentence(sentence, tagger):
             previous_word, previous_tag = word, pos_tag
         else:
             # TODO: better structure of this feature
-            res += previous_word + " " + previous_word + "_" + word + " " + previous_tag + " " + pos_tag + ' '
+            res += previous_word + "_" + previous_tag + "_" + word + "_" + pos_tag + ' '
             previous_word, previous_tag = word, pos_tag
 
     return res

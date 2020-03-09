@@ -48,9 +48,6 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
         yelp.create_balanced_samples(review_type, new_sample_amount, sample_size)
 
 
-    # Load dataset here.
-    # data in the shape of an array of features. [[features_sample1],[features_sample2], etc]
-    # target in the shape of [1 0 1 1 0 1] where 1 corresponds with the first sample.
     print("Reading " + review_type + " sample file number " + str(use_sample))
     use_sample = 0
     if review_type == 'regular':
@@ -63,7 +60,6 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
     print("Initializing BOW environment for " + str(use_feature_set))
     preprocess = make_preprocess_decision_dict(use_feature_set)
     vectorizer, speller, stop_words, ps, tagger = bow.create_BOW_environment(preprocess, use_sample)
-    print("Environment intialized!")
 
     print("Creating the feature and label arrays")
     X = np.zeros((sample_size, len(vectorizer.get_feature_names())))
@@ -134,4 +130,4 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
     print("5-fold f1-scores: " + str(f1s) + " average: " + str(sum(f1s) / len(f1s)))
 
 
-execute_SVM_process('regular', 'unigram', create_new_samples=False)
+execute_SVM_process('regular', 'bipos', create_new_samples=False)

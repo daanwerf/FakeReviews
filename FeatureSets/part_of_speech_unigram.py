@@ -40,6 +40,6 @@ def get_unigrams_and_POS_tags_of_text(text, tagger):
 
     res = " "
     for word, pos_tag in tagged_unigrams:
-        res += word + " " + pos_tag + " "
+        res += word + "_" + pos_tag + " "
 
     return res
