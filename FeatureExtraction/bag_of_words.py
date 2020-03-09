@@ -2,7 +2,7 @@ from nltk.stem import PorterStemmer
 from symspellpy.symspellpy import SymSpell, Verbosity
 from HelperFunctions import yelp_dataset_functions as yelp
 from nltk.corpus import stopwords
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from FeatureSets import part_of_speech_bigram as bipos, part_of_speech_unigram as unipos, deep_syntax as ds
 
 # Report: struggles with getting good bipos features
@@ -100,7 +100,10 @@ def create_BOW_environment(preprocess, use_sample):
 
     sentences = make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess)
     reader.close()
+    # Report: Tfidf shows significantly better results than countvector
     vectorizer = TfidfVectorizer()
     X = vectorizer.fit_transform(sentences)
+
+    # Report: usage of pipelines
 
     return vectorizer, speller, stop_words, ps, tagger

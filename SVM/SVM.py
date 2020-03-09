@@ -3,7 +3,8 @@ from HelperFunctions import yelp_dataset_functions as yelp
 from FeatureExtraction import bag_of_words as bow
 import numpy as np
 from sklearn import svm, metrics
-from sklearn.model_selection import cross_val_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.model_selection import cross_val_score, KFold
 from FeatureSets import part_of_speech_unigram as unipos, part_of_speech_bigram as bipos
 from FeatureSets import deep_syntax as ds
 
@@ -117,28 +118,59 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
             print("Progress: " + str((counter / sample_size) * 100) + "%")
             counter += 1
 
-    # Split dataset into training set and test set. X is input, Y is target
-    # replace data and target with the correct data and target.
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
-
-    print("X: " + str(np.shape(X_train)))
-    print("y: " + str(np.shape(y_train)))
-
-    print("Finished split, starting learning process")
+    y = np.asarray(y)
+    print(X.shape)
+    print(y.shape)
 
     # 5-fold cross validation, Linear Kernel
-    clf = svm.SVC(kernel='linear', C=1).fit(X_train, y_train)
+    print("Starting 5-fold cross-validation learning")
 
-    print("Done learning, calculating metrics now")
+    kf = KFold(n_splits=5, random_state=1, shuffle=True)
 
-    accuracies = cross_val_score(clf, X, y, cv=5, scoring='accuracy')
-    print("5-fold accuracies: " + str(accuracies) + " average: " + str(sum(accuracies) / len(accuracies)))
-    precisions = cross_val_score(clf, X, y, cv=5, scoring='precision')
-    print("5-fold precisions: " + str(precisions) + " average: " + str(sum(precisions) / len(precisions)))
-    recalls = cross_val_score(clf, X, y, cv=5, scoring='recall')
-    print("5-fold recalls: " + str(recalls) + " average: " + str(sum(recalls) / len(recalls)))
-    f1s = cross_val_score(clf, X, y, cv=5, scoring='f1')
-    print("5-fold f1-scores: " + str(f1s) + " average: " + str(sum(f1s) / len(f1s)))
+    accuracies = []
+    precisions = []
+    recalls = []
+    f1s = []
+
+    for train_index, test_index in kf.split(X):
+        data_train = X[train_index]
+        target_train = y[train_index]
+
+        data_test = X[test_index]
+        target_test = y[test_index]
+
+        clf = svm.SVC(kernel='linear', C=0.65)
+        clf.fit(data_train, target_train)
+
+        predictions = clf.predict(data_test)
+
+        # accuracy for the current fold only
+        accuracy = accuracy_score(target_test, predictions)
+        accuracies.append(accuracy)
+
+        # precision for the current fold only
+        precision = precision_score(target_test, predictions)
+        precisions.append(precision)
+
+        # recall for the current fold only
+        recall = recall_score(target_test, predictions)
+        recalls.append(recall)
+
+        # f1 for the current fold only
+        f1 = f1_score(target_test, predictions)
+        f1s.append(f1)
+
+    average_accuracy = np.mean(accuracies)
+    print("Accuracy: " + str(average_accuracy))
+
+    average_precision = np.mean(precisions)
+    print("Precision: " + str(average_precision))
+
+    average_recall = np.mean(recalls)
+    print("Recall: " + str(average_recall))
+
+    average_f1 = np.mean(f1s)
+    print("f1: " + str(average_f1))
 
 
-execute_SVM_process('regular', 'deep', create_new_samples=False)
+execute_SVM_process('regular', 'unigram', create_new_samples=False)

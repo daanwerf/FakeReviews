@@ -92,11 +92,9 @@ def get_bigram_and_deep_syntax_feature(review, speller, stop_words, ps, preproce
     return res
 
 
-
-
-
-def parse_stuff(review_text, grammar):
+def parse_stuff(review_text):
     # Parse a sentence by induced grammar
+    grammar = load_sample_grammar('regular', 0)
     example_sentence = re.split(r"[.!?]", review_text)[0]
 
     insideChartParser = pchart.InsideChartParser(grammar)
