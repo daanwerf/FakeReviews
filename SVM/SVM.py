@@ -41,19 +41,24 @@ def make_preprocess_decision_dict(use_feature_set):
     return preprocess
 
 
-def execute_SVM_process(use_feature_set, create_new_Samples = False, save_features_and_labels = False, new_sample_amount = 1,
-                        sample_size = 1000, use_sample = 0):
-    if create_new_Samples:
-        print("creating " + str(new_sample_amount) + " balanced samples of size " + str(sample_size))
-        yelp.create_balanced_samples(new_sample_amount, sample_size)
+def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, save_features_and_labels=False,
+                        new_sample_amount=1, sample_size=1000, use_sample=0):
+    if create_new_samples:
+        print("creating " + str(new_sample_amount) + " " + review_type + " balanced samples of size " + str(sample_size))
+        yelp.create_balanced_samples(review_type, new_sample_amount, sample_size)
 
 
     # Load dataset here.
     # data in the shape of an array of features. [[features_sample1],[features_sample2], etc]
     # target in the shape of [1 0 1 1 0 1] where 1 corresponds with the first sample.
-    print("Reading sample file number " + str(use_sample))
+    print("Reading " + review_type + " sample file number " + str(use_sample))
     use_sample = 0
-    sample_reader = yelp.get_balanced_sample_reader(use_sample)
+    if review_type == 'regular':
+        sample_reader = yelp.get_regular_balanced_sample_reader(use_sample)
+    elif review_type == '45stars':
+        sample_reader = yelp.get_45stars_balanced_sample_reader(use_sample)
+    elif review_type == '12stars':
+        sample_reader = yelp.get_12stars_balanced_sample_reader(use_sample)
 
     print("Initializing BOW environment for " + str(use_feature_set))
     preprocess = make_preprocess_decision_dict(use_feature_set)
@@ -129,4 +134,4 @@ def execute_SVM_process(use_feature_set, create_new_Samples = False, save_featur
     print("5-fold f1-scores: " + str(f1s) + " average: " + str(sum(f1s) / len(f1s)))
 
 
-execute_SVM_process('bipos')
+execute_SVM_process('regular', 'unigram', create_new_samples=True)

@@ -47,7 +47,7 @@ def get_words_from_symspell_lookup(sentence, speller):
 def sanitize_sentence(sentence, speller, stop_words, ps, preprocess):
     sentence = sentence.translate(str.maketrans('', '', r"""!"#$%&()*+,-./:;<=>?@[\]^_`{|}~""")).lower()
 
-    sentence = ' '.join([w for w in sentence.split() if len(w) > 2])
+    sentence = ' '.join([w for w in sentence.split() if len(w) > 1])
     sentence = ' '.join(s for s in sentence.split() if not any(c.isdigit() for c in s))
 
     if preprocess['stop_words']:
@@ -92,7 +92,7 @@ def create_BOW_environment(preprocess, use_sample):
         print("Loading and training unipos tagger")
         tagger = unipos.train_and_get_unigram_tagger()
 
-    reader = yelp.get_balanced_sample_reader(use_sample)
+    reader = yelp.get_regular_balanced_sample_reader(use_sample)
 
     sentences = make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess)
     reader.close()
