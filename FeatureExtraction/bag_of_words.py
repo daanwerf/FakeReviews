@@ -3,7 +3,7 @@ from symspellpy.symspellpy import SymSpell, Verbosity
 from HelperFunctions import yelp_dataset_functions as yelp
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
-from FeatureSets import part_of_speech_bigram as bipos, part_of_speech_unigram as unipos
+from FeatureSets import part_of_speech_bigram as bipos, part_of_speech_unigram as unipos, deep_syntax as ds
 
 # Report: struggles with getting good bipos features
 def make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess):
@@ -19,7 +19,9 @@ def make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess):
         elif preprocess['bipos']:
             sentences.append(bipos.get_bigrams_and_POS_tags_of_sentence(sanitized_sentence, tagger))
         elif preprocess['unipos']:
-            sentences.append(unipos.get_unigrams_and_POS_tags_of_text(sanitized_sentence, tagger))
+            sentences.append(unipos.get_unigram_POS_tags_of_text(sanitized_sentence, tagger))
+        elif preprocess['deep']:
+            sentences.append(ds.get_bigram_and_deep_syntax_feature(review_text, speller, stop_words, ps, preprocess))
 
         label, review_text = yelp.get_next_review_and_label(reader)
 
@@ -91,6 +93,8 @@ def create_BOW_environment(preprocess, use_sample):
     elif preprocess['unipos']:
         print("Loading unigram pos tagger")
         tagger = unipos.load_unigram_tagger()
+
+
 
     reader = yelp.get_regular_balanced_sample_reader(use_sample)
 

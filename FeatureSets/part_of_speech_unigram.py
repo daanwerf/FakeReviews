@@ -34,12 +34,12 @@ def load_unigram_tagger():
     return tagger
 
 
-def get_unigrams_and_POS_tags_of_text(text, tagger):
+def get_unigram_POS_tags_of_text(text, tagger):
     unigrams = word_tokenize(text)
     tagged_unigrams = tagger.tag(unigrams)
 
     res = " "
     for word, pos_tag in tagged_unigrams:
-        res += word + "_" + pos_tag + " "
+        res += pos_tag + " "
 
     return res

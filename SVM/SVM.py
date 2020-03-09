@@ -3,8 +3,10 @@ from HelperFunctions import yelp_dataset_functions as yelp
 from FeatureExtraction import bag_of_words as bow
 import numpy as np
 from sklearn import svm, metrics
-from sklearn.model_selection import cross_val_predict, cross_val_score
+from sklearn.model_selection import cross_val_score
 from FeatureSets import part_of_speech_unigram as unipos, part_of_speech_bigram as bipos
+from FeatureSets import deep_syntax as ds
+
 
 def make_preprocess_decision_dict(use_feature_set):
     preprocess = {
@@ -14,7 +16,8 @@ def make_preprocess_decision_dict(use_feature_set):
         'unigram': False,
         'bigram': False,
         'unipos': False,
-        'bipos': False
+        'bipos': False,
+        'deep': False
     }
 
     if use_feature_set == "unigram":
@@ -37,15 +40,22 @@ def make_preprocess_decision_dict(use_feature_set):
         preprocess['spell_checker'] = True
         preprocess['stemmer'] = False
         preprocess['bipos'] = True
+    elif use_feature_set == "deep":
+        preprocess['stop_words']: True
+        preprocess['spell_checker'] = True
+        preprocess['stemmer'] = False
+        preprocess['deep'] = True
 
     return preprocess
 
 
-def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, save_features_and_labels=False,
-                        new_sample_amount=1, sample_size=1000, use_sample=0):
+def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, new_sample_amount=1,
+                        sample_size=800, use_sample=0):
     if create_new_samples:
         print("creating " + str(new_sample_amount) + " " + review_type + " balanced samples of size " + str(sample_size))
         yelp.create_balanced_samples(review_type, new_sample_amount, sample_size)
+        print("Creating new grammar for new sample " + review_type + "_" + str(use_sample))
+        ds.create_grammar_of_sample(review_type, use_sample)
 
 
     print("Reading " + review_type + " sample file number " + str(use_sample))
@@ -87,7 +97,7 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
             counter += 1
         elif preprocess['unipos']:
             X[counter] = X[counter] + vectorizer.transform(
-                [unipos.get_unigrams_and_POS_tags_of_text(
+                [unipos.get_unigram_POS_tags_of_text(
                     bow.sanitize_sentence(review, speller, stop_words, ps, preprocess), tagger)])
             label, review = yelp.get_next_review_and_label(sample_reader)
             print("Progress: " + str((counter / sample_size) * 100) + "%")
@@ -99,12 +109,13 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
             label, review = yelp.get_next_review_and_label(sample_reader)
             print("Progress: " + str((counter / sample_size) * 100) + "%")
             counter += 1
-
-    if save_features_and_labels:
-        print("saving features and labels")
-        np.save("../Reviews/Yelp_Dataset/bagOfWords/sample_" + str(use_sample) + "_features", X)
-        np.save("../Reviews/Yelp_Dataset/bagOfWords/sample_" + str(use_sample) + "_labels", y)
-        print("finished saving, creating splits now")
+        elif preprocess['deep']:
+            X[counter] = X[counter] + vectorizer.transform(
+                [ds.get_bigram_and_deep_syntax_feature(review, speller, stop_words, ps, preprocess)]
+            )
+            label, review = yelp.get_next_review_and_label(sample_reader)
+            print("Progress: " + str((counter / sample_size) * 100) + "%")
+            counter += 1
 
     # Split dataset into training set and test set. X is input, Y is target
     # replace data and target with the correct data and target.
@@ -130,4 +141,4 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
     print("5-fold f1-scores: " + str(f1s) + " average: " + str(sum(f1s) / len(f1s)))
 
 
-execute_SVM_process('regular', 'bipos', create_new_samples=False)
+execute_SVM_process('regular', 'deep', create_new_samples=False)
