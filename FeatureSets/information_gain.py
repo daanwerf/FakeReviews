@@ -27,7 +27,7 @@ def test_random_stuff(corpus, n):
     print(sorted(freqs, key=lambda x: -x[1]))
 
     print("new code IG:\n")
-    vec3 =CountVectorizer().fit(corpus)
+    vec3 = CountVectorizer(stop_words='english').fit(corpus)
     bow = vec3.transform(corpus)
     sum_of_words = bow.sum(axis=0)
     words_freq = [(word, sum_of_words[0, idx]) for word, idx in vec3.vocabulary_.items()]
