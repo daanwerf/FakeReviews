@@ -2,9 +2,10 @@ import nltk
 from nltk import RegexpTagger, UnigramTagger
 from nltk.corpus import brown
 from nltk import word_tokenize
+from pickle import dump, load
 
 
-def train_and_get_unigram_tagger():
+def train_and_save_unigram_tagger():
     train_text = brown.tagged_sents()
     regexp_tagger = RegexpTagger(
                 [(r'^-?[0-9]+(.[0-9]+)?$', 'CD'),   # cardinal numbers
@@ -18,7 +19,19 @@ def train_and_get_unigram_tagger():
                  (r'.*', 'NN')                      # nouns (default)
             ])
 
-    return UnigramTagger(train_text, backoff=regexp_tagger)
+    unigram_tagger = UnigramTagger(train_text, backoff=regexp_tagger)
+
+    output = open('../taggers/unigram_tagger.pkl', 'wb')
+    dump(unigram_tagger, output, -1)
+    output.close()
+
+
+def load_unigram_tagger():
+    input_tagger = open('../taggers/unigram_tagger.pkl', 'rb')
+    tagger = load(input_tagger)
+    input_tagger.close()
+
+    return tagger
 
 
 def get_unigrams_and_POS_tags_of_text(text, tagger):

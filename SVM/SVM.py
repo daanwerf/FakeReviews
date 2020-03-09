@@ -134,4 +134,4 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
     print("5-fold f1-scores: " + str(f1s) + " average: " + str(sum(f1s) / len(f1s)))
 
 
-execute_SVM_process('regular', 'unigram', create_new_samples=True)
+execute_SVM_process('regular', 'unigram', create_new_samples=False)

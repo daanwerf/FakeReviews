@@ -81,16 +81,16 @@ def create_BOW_environment(preprocess, use_sample):
 
     stop_words = None
     if preprocess['stop_words']:
-        print("Loading stop words")
+        print("Loading stopwords")
         stop_words = set(stopwords.words('english'))
 
     tagger = None
     if preprocess['bipos']:
-        print("Loading and training bipos tagger")
-        tagger = bipos.train_and_get_bigram_tagger()
+        print("Loading bigram pos tagger")
+        tagger = bipos.load_bigram_tagger()
     elif preprocess['unipos']:
-        print("Loading and training unipos tagger")
-        tagger = unipos.train_and_get_unigram_tagger()
+        print("Loading unigram pos tagger")
+        tagger = unipos.load_unigram_tagger()
 
     reader = yelp.get_regular_balanced_sample_reader(use_sample)
 

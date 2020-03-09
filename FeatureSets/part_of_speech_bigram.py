@@ -1,9 +1,10 @@
 from nltk import RegexpTagger, UnigramTagger, BigramTagger
 from nltk.corpus import brown
 from nltk import word_tokenize
+from pickle import dump, load
 
 
-def train_and_get_bigram_tagger():
+def train_and_save_bigram_tagger():
     train_text = brown.tagged_sents()
     regexp_tagger = RegexpTagger(
                 [(r'^-?[0-9]+(.[0-9]+)?$', 'CD'),   # cardinal numbers
@@ -20,7 +21,17 @@ def train_and_get_bigram_tagger():
     unigram_tagger = UnigramTagger(train_text, backoff=regexp_tagger)
     bigram_tagger = BigramTagger(train_text, backoff=unigram_tagger)
 
-    return bigram_tagger
+    output = open('../taggers/bigram_tagger.pkl', 'wb')
+    dump(bigram_tagger, output, -1)
+    output.close()
+
+
+def load_bigram_tagger():
+    input_tagger = open('../taggers/bigram_tagger.pkl', 'rb')
+    tagger = load(input_tagger)
+    input_tagger.close()
+
+    return tagger
 
 
 def get_bigrams_and_POS_tags_of_sentence(sentence, tagger):

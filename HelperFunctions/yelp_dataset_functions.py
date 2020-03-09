@@ -350,24 +350,32 @@ def create_1_and_2_star_labeled_fake_and_true_review_dataset_from_source():
     print(total_amount)
 
 
-def get_labeled_review_reader():
+def get_regular_labeled_review_reader():
     return open("../Reviews/Yelp_Dataset/allStarReviews/labeled_review.txt", "r", encoding="utf8")
 
 
-def get_labeled_review_fake_reader():
+def get_regular_labeled_review_fake_reader():
     return open("../Reviews/Yelp_Dataset/allStarReviews/labeled_reviews_fake.txt", "r", encoding="utf8")
 
 
-def get_labeled_review_true_reader():
+def get_regular_labeled_review_true_reader():
     return open("../Reviews/Yelp_Dataset/allStarReviews/labeled_reviews_true.txt", "r", encoding="utf8")
 
 
-def get_labeled_review_validation_true_reader():
-    return open("../Reviews/Yelp_Dataset/machineLearningSets/labeled_reviews_validation_true.txt", "r", encoding="utf8")
+def get_45stars_labeled_review_fake_reader():
+    return open("../Reviews/Yelp_Dataset/fourAndFiveStarReviews/labeled_reviews_fake.txt", "r", encoding="utf8")
 
 
-def get_labeled_review_validation_fake_reader():
-    return open("../Reviews/Yelp_Dataset/machineLearningSets/labeled_reviews_validation_fake.txt", "r", encoding="utf8")
+def get_45stars_labeled_review_true_reader():
+    return open("../Reviews/Yelp_Dataset/fourAndFiveStarReviews/labeled_reviews_true.txt", "r", encoding="utf8")
+
+
+def get_12stars_labeled_review_fake_reader():
+    return open("../Reviews/Yelp_Dataset/oneAndTwoStarReviews/labeled_reviews_fake.txt", "r", encoding="utf8")
+
+
+def get_12stars_labeled_review_true_reader():
+    return open("../Reviews/Yelp_Dataset/oneAndTwoStarReviews/labeled_reviews_true.txt", "r", encoding="utf8")
 
 
 def get_regular_balanced_sample_reader(sample_id):
@@ -405,7 +413,7 @@ def get_next_review_and_label(reader):
 
 def find_class_distribution():
     counter = [0] * 2
-    reader = get_labeled_review_reader()
+    reader = get_regular_labeled_review_reader()
 
     current_label, _ = get_next_review_and_label(reader)
     while True:
@@ -424,7 +432,7 @@ def find_class_distribution():
 
 
 def find_longest_review_length():
-    reader = get_labeled_review_reader()
+    reader = get_regular_labeled_review_reader()
     max_length = 0
 
     current_label, review = get_next_review_and_label(reader)
@@ -443,7 +451,7 @@ def find_longest_review_length():
 
 
 def create_test_set():
-    reader = get_labeled_review_reader()
+    reader = get_regular_labeled_review_reader()
     test_set_out = open("../Reviews/Yelp_Dataset/machineLearningSets/test_set.txt", "w", encoding="utf8")
 
     total_reviews = 608598
@@ -460,20 +468,28 @@ def create_test_set():
 def create_balanced_samples(sample_type, sample_amount, upper_bound):
     for i in range(sample_amount):
         if sample_type == "regular":
-            true_reader = get_labeled_review_true_reader()
-            fake_reader = get_labeled_review_fake_reader()
+            true_reader = get_regular_labeled_review_true_reader()
+            true_review_amount = 528132
+            fake_reader = get_regular_labeled_review_fake_reader()
+            fake_review_amount = 80466
             sample_outfile = open("../Reviews/Yelp_Dataset/samples/sample_regular_" + str(i) + ".txt", "w",
                                   encoding="utf8")
         elif sample_type == "45stars":
-            print("x")
+            true_reader = get_45stars_labeled_review_true_reader()
+            true_review_amount = 390511
+            fake_reader = get_45stars_labeled_review_fake_reader()
+            fake_review_amount = 56363
             sample_outfile = open("../Reviews/Yelp_Dataset/samples/sample_45stars_" + str(i) + ".txt", "w",
                                   encoding="utf8")
         elif sample_type == "12stars":
-            print("x")
+            true_reader = get_12stars_labeled_review_true_reader()
+            true_review_amount = 60823
+            fake_reader = get_12stars_labeled_review_fake_reader()
+            fake_review_amount = 17762
             sample_outfile = open("../Reviews/Yelp_Dataset/samples/sample_12stars_" + str(i) + ".txt", "w",
                                   encoding="utf8")
 
-        true_dist, fake_dist = us.perform_undersampling(upper_bound)
+        true_dist, fake_dist = us.perform_undersampling(true_review_amount, fake_review_amount, upper_bound)
 
         amount_true = 0
         amount_fake = 0
