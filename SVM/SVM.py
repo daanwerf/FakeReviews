@@ -4,6 +4,7 @@ from FeatureExtraction import bag_of_words as bow
 import numpy as np
 from sklearn import svm, metrics
 from sklearn.model_selection import cross_val_predict, cross_val_score
+from FeatureSets import part_of_speech_unigram as unipos, part_of_speech_bigram as bipos
 
 def make_preprocess_decision_dict(use_feature_set):
     preprocess = {
@@ -24,12 +25,12 @@ def make_preprocess_decision_dict(use_feature_set):
     elif use_feature_set == "bigram":
         preprocess['stop_words']: True
         preprocess['spell_checker'] = True
-        preprocess['stemmer'] = True
+        preprocess['stemmer'] = False
         preprocess['bigram'] = True
     elif use_feature_set == "unipos":
         preprocess['stop_words']: True
         preprocess['spell_checker'] = True
-        preprocess['stemmer'] = True
+        preprocess['stemmer'] = False
         preprocess['unipos'] = True
     elif use_feature_set == "bipos":
         preprocess['stop_words']: True
@@ -56,7 +57,7 @@ def execute_SVM_process(use_feature_set, create_new_Samples = False, save_featur
 
     print("Initializing BOW environment for " + str(use_feature_set))
     preprocess = make_preprocess_decision_dict(use_feature_set)
-    vectorizer, speller, stop_words, ps = bow.create_BOW_environment(preprocess, use_sample)
+    vectorizer, speller, stop_words, ps, tagger = bow.create_BOW_environment(preprocess, use_sample)
     print("Environment intialized!")
 
     print("Creating the feature and label arrays")
@@ -69,10 +70,34 @@ def execute_SVM_process(use_feature_set, create_new_Samples = False, save_featur
     # Report: matrix addition waaaaaaaayyy faster than appending
     while label != "-1":
         y.append(int(label))
-        X[counter] = X[counter] + vectorizer.transform([bow.sanitize_sentence(review, speller, stop_words, ps, preprocess)])
-        label, review = yelp.get_next_review_and_label(sample_reader)
-        print("Progress: " + str((counter/sample_size) * 100) + "%")
-        counter += 1
+
+        if preprocess['unigram']:
+            X[counter] = X[counter] + vectorizer.transform(
+                [bow.sanitize_sentence(review, speller, stop_words, ps, preprocess)])
+            label, review = yelp.get_next_review_and_label(sample_reader)
+            print("Progress: " + str((counter/sample_size) * 100) + "%")
+            counter += 1
+        elif preprocess['bigram']:
+            X[counter] = X[counter] + vectorizer.transform(
+                [bipos.get_bigrams_and_unigrams_of_sentence(
+                    bow.sanitize_sentence(review, speller, stop_words, ps, preprocess))])
+            label, review = yelp.get_next_review_and_label(sample_reader)
+            print("Progress: " + str((counter / sample_size) * 100) + "%")
+            counter += 1
+        elif preprocess['unipos']:
+            X[counter] = X[counter] + vectorizer.transform(
+                [unipos.get_unigrams_and_POS_tags_of_text(
+                    bow.sanitize_sentence(review, speller, stop_words, ps, preprocess), tagger)])
+            label, review = yelp.get_next_review_and_label(sample_reader)
+            print("Progress: " + str((counter / sample_size) * 100) + "%")
+            counter += 1
+        elif preprocess['bipos']:
+            X[counter] = X[counter] + vectorizer.transform(
+                [bipos.get_bigrams_and_POS_tags_of_sentence(
+                    bow.sanitize_sentence(review, speller, stop_words, ps, preprocess), tagger)])
+            label, review = yelp.get_next_review_and_label(sample_reader)
+            print("Progress: " + str((counter / sample_size) * 100) + "%")
+            counter += 1
 
     if save_features_and_labels:
         print("saving features and labels")

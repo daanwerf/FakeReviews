@@ -22,12 +22,11 @@ def train_and_get_unigram_tagger():
 
 
 def get_unigrams_and_POS_tags_of_text(text, tagger):
-    text = text.replace(",", "").replace(".", "").replace("-", " ").replace("=", " ")
     unigrams = word_tokenize(text)
     tagged_unigrams = tagger.tag(unigrams)
 
-    res = []
+    res = " "
     for word, pos_tag in tagged_unigrams:
-        res.append(word + "_" + pos_tag)
+        res += word + " " + pos_tag + " "
 
     return res

@@ -3,7 +3,7 @@ from symspellpy.symspellpy import SymSpell, Verbosity
 from HelperFunctions import yelp_dataset_functions as yelp
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
-from FeatureSets import part_of_speech_bigram as bipos
+from FeatureSets import part_of_speech_bigram as bipos, part_of_speech_unigram as unipos
 
 # Report: struggles with getting good bipos features
 def make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess):
@@ -14,8 +14,12 @@ def make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess):
 
         if preprocess['unigram']:
             sentences.append(sanitized_sentence)
+        elif preprocess['bigram']:
+            sentences.append(bipos.get_bigrams_and_unigrams_of_sentence(sanitized_sentence))
         elif preprocess['bipos']:
             sentences.append(bipos.get_bigrams_and_POS_tags_of_sentence(sanitized_sentence, tagger))
+        elif preprocess['unipos']:
+            sentences.append(unipos.get_unigrams_and_POS_tags_of_text(sanitized_sentence, tagger))
 
         label, review_text = yelp.get_next_review_and_label(reader)
 
@@ -82,8 +86,11 @@ def create_BOW_environment(preprocess, use_sample):
 
     tagger = None
     if preprocess['bipos']:
-        print("Loading and training tagger")
+        print("Loading and training bipos tagger")
         tagger = bipos.train_and_get_bigram_tagger()
+    elif preprocess['unipos']:
+        print("Loading and training unipos tagger")
+        tagger = unipos.train_and_get_unigram_tagger()
 
     reader = yelp.get_balanced_sample_reader(use_sample)
 
@@ -92,4 +99,4 @@ def create_BOW_environment(preprocess, use_sample):
     vectorizer = TfidfVectorizer()
     X = vectorizer.fit_transform(sentences)
 
-    return vectorizer, speller, stop_words, ps
+    return vectorizer, speller, stop_words, ps, tagger

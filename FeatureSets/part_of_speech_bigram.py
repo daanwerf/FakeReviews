@@ -24,7 +24,6 @@ def train_and_get_bigram_tagger():
 
 
 def get_bigrams_and_POS_tags_of_sentence(sentence, tagger):
-    sentence = sentence.replace(",", "").replace(".", "").replace("-", " ").replace("=", " ")
     tagged_bigrams = tagger.tag(word_tokenize(sentence))
 
     res = ''
@@ -33,7 +32,21 @@ def get_bigrams_and_POS_tags_of_sentence(sentence, tagger):
         if previous_word == '':
             previous_word, previous_tag = word, pos_tag
         else:
-            res += previous_word + "_" + word + ' ' + previous_tag + "_" + pos_tag + ' '
+            # TODO: better structure of this feature
+            res += previous_word + " " + previous_word + "_" + word + " " + previous_tag + " " + pos_tag + ' '
             previous_word, previous_tag = word, pos_tag
+
+    return res
+
+
+def get_bigrams_and_unigrams_of_sentence(sentence):
+    res = ''
+    previous_word = ''
+    for word in sentence.split():
+        if previous_word == '':
+            previous_word = word
+        else:
+            res += previous_word + " " + previous_word + "_" + word + " "
+            previous_word = word
 
     return res
