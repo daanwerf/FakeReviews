@@ -15,8 +15,17 @@ if create_new_Samples:
     yelp.create_balanced_samples(sample_amount, sample_size)
 
 # TEST IG STUFF
-IG.test_random_stuff()
 
+corpus = [
+        'This is the first document',
+        'This is second document',
+        'And this is the third one',
+        'Is this the first document?',
+]
+
+top3commonwords = IG.test_random_stuff(corpus, 3)
+for word,freq in top3commonwords:
+    print(word, freq)
 
 
 
