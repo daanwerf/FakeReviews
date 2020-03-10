@@ -87,7 +87,7 @@ def create_BOW_IG():
     X = vectorizer.fit_transform(sentences)
 
     sum_of_words = X.sum(axis=0)
-    words_freq = [(word, sum_of_words[0, idx]) for word, idx in vectorizer.vocabulary_.items()]
+    words_freq = [(word, sum_of_words[0, idx], 0) for word, idx in vectorizer.vocabulary_.items()]
     words_freq = sorted(words_freq, key= lambda x: x[1], reverse=True)
 
     print(sum_of_words)
