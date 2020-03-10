@@ -5,6 +5,8 @@ from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from FeatureSets import part_of_speech_bigram as bipos, part_of_speech_unigram as unipos, deep_syntax as ds, \
     part_of_speech_sequence_pattern as posseq
+import nltk
+nltk.download('punkt')
 
 # Report: struggles with getting good bipos features
 def make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess):

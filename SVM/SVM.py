@@ -17,6 +17,7 @@ def make_preprocess_decision_dict(use_feature_set):
         'unigram': False,
         'bigram': False,
         'unipos': False,
+        'information_gain': False,
         'bipos': False,
         'deep': False,
         'posseq': False
@@ -42,6 +43,11 @@ def make_preprocess_decision_dict(use_feature_set):
         preprocess['spell_checker'] = True
         preprocess['stemmer'] = False
         preprocess['bipos'] = True
+    elif use_feature_set == "information_gain":
+        preprocess['stop_words'] = True
+        preprocess['spell_checker'] = True
+        preprocess['stemmer'] = False
+        preprocess['information_gain'] = True
     elif use_feature_set == "deep":
         preprocess['stop_words'] = True
         preprocess['spell_checker'] = True
