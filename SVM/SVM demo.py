@@ -9,7 +9,7 @@ import nltk
 save_features_and_labels = False
 create_new_Samples = True
 sample_amount = 1
-sample_size = 1000
+sample_size = 50
 if create_new_Samples:
     print("creating " + str(sample_amount) + " balanced samples of size " + str(sample_size))
     yelp.create_balanced_samples(sample_amount, sample_size)

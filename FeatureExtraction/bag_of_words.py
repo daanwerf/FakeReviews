@@ -108,7 +108,7 @@ def create_fake_sentences_IG(reader, speller, stop_words, ps, fake_sentences):
 
     sum_of_words_fake = X_fake.sum(axis=0)
 
-    words_freq_fake = [(word, sum_of_words_fake[0, idx], 0) for word, idx in vectorizer.vocabulary_.items()]
+    words_freq_fake = [(word, sum_of_words_fake[0, idx], 0.0) for word, idx in vectorizer.vocabulary_.items()]
     words_freq_fake = sorted(words_freq_fake, key= lambda x: x[1], reverse=True)
 
     return vectorizer, speller, stop_words, ps, words_freq_fake
@@ -120,7 +120,7 @@ def create_real_sentences_IG(reader, speller, stop_words, ps, real_sentences):
     X_real = vectorizer.fit_transform(real_sentences)
     sum_of_words_real = X_real.sum(axis=0)
 
-    words_freq_real = [(word, sum_of_words_real[0, idx], 0) for word, idx in vectorizer.vocabulary_.items()]
+    words_freq_real = [(word, sum_of_words_real[0, idx], 0.0) for word, idx in vectorizer.vocabulary_.items()]
     words_freq_real = sorted(words_freq_real, key=lambda x: x[1], reverse=True)
 
 
