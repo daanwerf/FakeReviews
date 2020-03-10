@@ -6,7 +6,7 @@ from sklearn import svm, metrics
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import cross_val_score, KFold
 from FeatureSets import part_of_speech_unigram as unipos, part_of_speech_bigram as bipos
-from FeatureSets import deep_syntax as ds
+from FeatureSets import deep_syntax as ds, part_of_speech_sequence_pattern as posseq
 
 
 def make_preprocess_decision_dict(use_feature_set):
@@ -18,7 +18,8 @@ def make_preprocess_decision_dict(use_feature_set):
         'bigram': False,
         'unipos': False,
         'bipos': False,
-        'deep': False
+        'deep': False,
+        'posseq': False
     }
 
     if use_feature_set == "unigram":
@@ -27,25 +28,30 @@ def make_preprocess_decision_dict(use_feature_set):
         preprocess['stemmer'] = False
         preprocess['unigram'] = True
     elif use_feature_set == "bigram":
-        preprocess['stop_words']: True
+        preprocess['stop_words'] = True
         preprocess['spell_checker'] = True
         preprocess['stemmer'] = False
         preprocess['bigram'] = True
     elif use_feature_set == "unipos":
-        preprocess['stop_words']: True
+        preprocess['stop_words'] = True
         preprocess['spell_checker'] = True
         preprocess['stemmer'] = False
         preprocess['unipos'] = True
     elif use_feature_set == "bipos":
-        preprocess['stop_words']: True
+        preprocess['stop_words'] = True
         preprocess['spell_checker'] = True
         preprocess['stemmer'] = False
         preprocess['bipos'] = True
     elif use_feature_set == "deep":
-        preprocess['stop_words']: True
+        preprocess['stop_words'] = True
         preprocess['spell_checker'] = True
         preprocess['stemmer'] = False
         preprocess['deep'] = True
+    elif use_feature_set == "posseq":
+        preprocess['stop_words'] = True
+        preprocess['spell_checker'] = False
+        preprocess['stemmer'] = False
+        preprocess['posseq'] = True
 
     return preprocess
 
@@ -117,6 +123,13 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
             label, review = yelp.get_next_review_and_label(sample_reader)
             print("Progress: " + str((counter / sample_size) * 100) + "%")
             counter += 1
+        elif preprocess['posseq']:
+            X[counter] = X[counter] + vectorizer.transform(
+                [posseq.get_POS_sequence(review, tagger, speller, stop_words, ps, preprocess)]
+            )
+            label, review = yelp.get_next_review_and_label(sample_reader)
+            print("Progress: " + str((counter / sample_size) * 100) + "%")
+            counter += 1
 
     y = np.asarray(y)
     print(X.shape)
@@ -173,4 +186,4 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
     print("f1: " + str(average_f1))
 
 
-execute_SVM_process('regular', 'unigram', create_new_samples=False)
+execute_SVM_process('regular', 'posseq', create_new_samples=False)
