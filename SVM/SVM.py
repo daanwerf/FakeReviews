@@ -186,4 +186,4 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
     print("f1: " + str(average_f1))
 
 
-execute_SVM_process('regular', 'posseq', create_new_samples=False)
+execute_SVM_process('45stars', 'posseq', create_new_samples=False)
