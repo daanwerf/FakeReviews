@@ -47,7 +47,13 @@ def test_random_stuff(corpus, n):
 
 
     vectorizer, speller, stop_words, ps, top_words  = bag_of_words.create_BOW_IG()
-    print("SO FAR SO GOOOD")
+
+    counter = 0
+    for word,freq in top_words:
+        counter += freq
+        print(word,freq)
+        print("updated counter is: " , freq)
+
 
     return -1
 
