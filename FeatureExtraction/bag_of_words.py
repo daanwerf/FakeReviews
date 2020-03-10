@@ -15,6 +15,30 @@ def make_sentence_array(reader, speller, stop_words, ps):
 
     return sentences
 
+# return all the fake reviews for information gain
+def make_sentence_array_fake(reader, speller, stop_words, ps):
+    sentences = []
+    label, review_text = yelp.get_next_review_and_label(reader)
+    print(label)
+    while label == "1":
+        label, review_text = yelp.get_next_review_and_label(reader)
+    while label == "0":
+        sentences.append(sanitize_sentence(review_text, speller, stop_words, ps))
+        label, review_text = yelp.get_next_review_and_label(reader)
+
+    return sentences
+
+#return all the real review for information gain
+def make_sentence_array_real(reader, speller, stop_words, ps):
+    sentences = []
+    label, review_text = yelp.get_next_review_and_label(reader)
+    while label == "1":
+        sentences.append(sanitize_sentence(review_text, speller, stop_words, ps))
+        label, review_text = yelp.get_next_review_and_label(reader)
+
+    return sentences
+
+
 # Report: too high max distance -> too large change in words.
 def get_words_from_symspell_lookup(sentence, speller):
     new_sentence = ""
@@ -70,7 +94,7 @@ def create_BOW_environment():
     return vectorizer, speller, stop_words, ps
 
 
-def create_BOW_IG():
+def create_BOW_IG_env():
     speller = SymSpell(max_dictionary_edit_distance=4)
     dictionary_path = "../dictionaries/frequency_dictionary_en_82_765.txt"
     speller.load_dictionary(dictionary_path, 0, 1)
@@ -80,18 +104,40 @@ def create_BOW_IG():
 
     reader = yelp.get_balanced_sample_reader(0)
 
-    sentences = make_sentence_array(reader, speller, stop_words, ps)
+    vectorizer_fake, speller_fake, stop_words_fake, ps_fake, words_freq_fake = create_fake_sentences_IG(reader, speller, stop_words, ps)
+    vectorizer_real, speller_real, stop_words_real, ps_real, words_freq_real = create_real_sentences_IG(reader, speller, stop_words, ps)
+
     reader.close()
+
+    return vectorizer_fake, speller_fake, stop_words_fake, ps_fake, words_freq_fake,vectorizer_real, speller_real, stop_words_real, ps_real, words_freq_real
+
+
+
+def create_fake_sentences_IG(reader, speller, stop_words, ps):
+
+    fake_sentences = make_sentence_array_fake(reader, speller, stop_words, ps)
+
     vectorizer = CountVectorizer()
 
-    X = vectorizer.fit_transform(sentences)
+    X_fake = vectorizer.fit_transform(fake_sentences)
 
-    sum_of_words = X.sum(axis=0)
-    words_freq = [(word, sum_of_words[0, idx], 0) for word, idx in vectorizer.vocabulary_.items()]
-    words_freq = sorted(words_freq, key= lambda x: x[1], reverse=True)
+    sum_of_words_fake = X_fake.sum(axis=0)
 
-    print(sum_of_words)
-    print("IN BAG OF WORDS IN IG")
+    words_freq_fake = [(word, sum_of_words_fake[0, idx], 0) for word, idx in vectorizer.vocabulary_.items()]
+    words_freq_fake = sorted(words_freq_fake, key= lambda x: x[1], reverse=True)
 
-    return vectorizer, speller, stop_words, ps, words_freq
+    return vectorizer, speller, stop_words, ps, words_freq_fake
 
+def create_real_sentences_IG(reader, speller, stop_words, ps):
+
+    real_sentences = make_sentence_array_real(reader, speller, stop_words, ps)
+    vectorizer = CountVectorizer()
+
+    X_real = vectorizer.fit_transform(real_sentences)
+    sum_of_words_real = X_real.sum(axis=0)
+
+    words_freq_real = [(word, sum_of_words_real[0, idx], 0) for word, idx in vectorizer.vocabulary_.items()]
+    words_freq_real = sorted(words_freq_real, key=lambda x: x[1], reverse=True)
+
+
+    return vectorizer, speller, stop_words, ps, words_freq_real

@@ -4,8 +4,9 @@ from nltk.stem import PorterStemmer
 from symspellpy.symspellpy import SymSpell, Verbosity
 from nltk.corpus import stopwords
 from FeatureExtraction import bag_of_words
+from scipy.stats import entropy
 
-def test_random_stuff(corpus, n):
+def test_random_stuff():
     # corpus = [
     #     'This is the first document',
     #     'This is second document',
@@ -46,16 +47,28 @@ def test_random_stuff(corpus, n):
     #newest code ----------
 
 
-    vectorizer, speller, stop_words, ps, top_words  = bag_of_words.create_BOW_IG()
+    vectorizer_fake, speller_fake, stop_words_fake, ps_fake, top_words_fake, vectorizer_real, speller_real, stop_words_real, ps_real, top_words_real = bag_of_words.create_BOW_IG_env()
 
-    counter = 0
-    for word,freq, prob in top_words:
-        counter += freq
-        # print(word,freq, prob)
+    counter_fake = 0
+    for word,freq, prob in top_words_fake:
+        counter_fake += freq
 
-    for word, freq, prob in top_words:
-        prob = freq / counter
+    for word, freq, prob in top_words_fake:
+        prob = freq / counter_fake
         print(word, freq, prob)
 
+    print("FAKE WORDS FINISHED")
+
+    counter_real = 0
+    for word,freq, prob in top_words_real:
+        counter_real += freq
+
+    for word, freq, prob in top_words_real:
+        prob = freq / counter_real
+        print(word, freq, prob)
+
+    print("REAL WORDS FINISHED")
+
     return -1
+
 
