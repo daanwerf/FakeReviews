@@ -3,6 +3,7 @@ from symspellpy.symspellpy import SymSpell, Verbosity
 from HelperFunctions import yelp_dataset_functions as yelp
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 
 
 def make_sentence_array(reader, speller, stop_words, ps):
@@ -67,3 +68,30 @@ def create_BOW_environment():
 
 
     return vectorizer, speller, stop_words, ps
+
+
+def create_BOW_IG():
+    speller = SymSpell(max_dictionary_edit_distance=4)
+    dictionary_path = "../dictionaries/frequency_dictionary_en_82_765.txt"
+    speller.load_dictionary(dictionary_path, 0, 1)
+
+    ps = PorterStemmer()
+    stop_words = set(stopwords.words('english'))
+
+    reader = yelp.get_balanced_sample_reader(0)
+
+    sentences = make_sentence_array(reader, speller, stop_words, ps)
+    reader.close()
+    vectorizer = CountVectorizer()
+
+    X = vectorizer.fit_transform(sentences)
+
+    sum_of_words = X.sum(axis=0)
+    words_freq = [(word, sum_of_words[0, idx]) for word, idx in vectorizer.vocabulary_.items()]
+    words_freq = sorted(words_freq, key= lambda x: x[1], reverse=True)
+
+    print(sum_of_words)
+    print("IN BAG OF WORDS IN IG")
+
+    return vectorizer, speller, stop_words, ps, words_freq
+
