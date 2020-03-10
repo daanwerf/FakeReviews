@@ -1,4 +1,3 @@
-import nltk
 from nltk import RegexpTagger, UnigramTagger
 from nltk.corpus import brown
 from nltk import word_tokenize
