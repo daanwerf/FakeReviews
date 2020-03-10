@@ -6,6 +6,7 @@ from nltk.corpus import stopwords
 from FeatureExtraction import bag_of_words
 from scipy.stats import entropy
 import numpy as np
+from itertools import islice
 
 def test_random_stuff():
 
@@ -37,79 +38,55 @@ def test_random_stuff():
 
 def kl_divergence(top_words_fake, top_words_real, dict_fake, dict_real):
 
-    #print(top_words_fake)
-
     dict_kl_per_word = dict()
 
+    # calculate KL(F||N)
     sum_fn = 0
     for word, freq, prob in top_words_fake:
 
-        #calculate KL(F||N)
+        #Cannot divide by 0
         if word in dict_real:
             # print("for KL(F||N) -> F(i): ", dict_fake.get(word)[1])
             # print("for KL(F||N) -> N(i): ", dict_real.get(word)[1])
             kl_word = dict_fake.get(word)[1] * np.log(dict_fake.get(word)[1] / dict_real.get(word)[1])
-            sum_fn +=  kl_word
+            sum_fn += kl_word
 
             # add every word in fake  to kl dict with the corresponding kl_value
             dict_kl_per_word[word] = kl_word
 
-
-
-
     print("total KL(F||N) for table 5 = ", sum_fn)
 
+    # calculate KL(N||F)
     sum_nf = 0
     for word, freq, prob in top_words_real:
 
-        #calculate KL(N||F)
+        #Cannot divide by 0
         if word in dict_fake:
             # print("for KL(N||F) -> F(i): ", dict_fake.get(word)[1])
             # print("for KL(N||F) -> N(i): ", dict_real.get(word)[1])
             kl_word = dict_real.get(word)[1] * np.log(dict_real.get(word)[1] / dict_fake.get(word)[1])
             sum_nf +=  kl_word
 
-            #check if word exists in dict
-            if word in dict_kl_per_word:
-                # substract to get the delta
-               # print("claims to contain the word ", word, " in dict. So tuple: -> ", dict_kl_per_word[word])
-                print("before the update of existing word in dict_kl ", dict_kl_per_word[word])
-                dict_kl_per_word[word] = dict_kl_per_word.get(word) - kl_word
-                print("after the update of word to dict_kl: ", dict_kl_per_word[word])
-            else:
-                print("should never be here ")
+            #update to get the delta
+            dict_kl_per_word[word] = dict_kl_per_word.get(word) - kl_word
+
+
 
     print("total KL(N||F) for table 5 = ", sum_nf)
     print("total delta KL for tale 5 = ", float(sum_fn - sum_nf))
 
+    print(dict_kl_per_word)
+    # sort dict by absolute value of kb
+    sorted(dict_kl_per_word, key=lambda w: abs(dict_kl_per_word[w]), reverse=True)
 
+    n_items = take(10, dict_kl_per_word.items())
 
-    #
-    # for i in range(0, 20): # change to for loop over ALL WORDS -> word, freq, prob in blablal.
-    #
-    #     # calculate KL(F||N) --> dict_fake.get(word)[1]
-    #     # dict = {"word", (freq, prob) }
-    #     # dict.get("food")[1] => prob van food
-    #     fake_word = top_words_fake[i]
-    #     print(fake_word)
-    #
-    #     # check if fake word exists in "real" dictionary
-    #     if fake_word[0] in dict_real:
-    #         print("F(i): ", dict_fake.get(fake_word[0])[1])
-    #         print("N(i): ", dict_real.get(fake_word[0])[1])
-    #         sum += dict_fake.get(fake_word[0])[1] * np.log(dict_fake.get(fake_word[0])[1] / dict_real.get(fake_word[0])[1] )
-
-        # do same shit for KL(N||F)
-
-
-        # take delta
-
-        # sort on delta
-
-        # take top n based
-
+    print("first 10 items based on they absolute delta kb: ", n_items)
 
     return -1
 
 
 
+def take(n, iterable):
+    "Return first n items of the iterable as a list"
+    return list(islice(iterable, n))
