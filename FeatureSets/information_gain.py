@@ -19,7 +19,7 @@ def test_random_stuff():
     for word, freq, prob in top_words_fake:
         prob = freq / counter_fake
         dict_fake[word] = (freq, prob)
-        print("fake word =", word, ", freq=",  freq, ", probability=", prob)
+     #   print("fake word =", word, ", freq=",  freq, ", probability=", prob)
 
     dict_real = dict()
     counter_real = 0
@@ -29,7 +29,7 @@ def test_random_stuff():
     for word, freq, prob in top_words_real:
         prob = freq / counter_real
         dict_real[word] = (freq, prob)
-        print("real word=", word, ", freq=", freq, ", probability=", prob)
+    #    print("real word=", word, ", freq=", freq, ", probability=", prob)
 
     kl_divergence(top_words_fake, top_words_real, dict_fake, dict_real)
 
@@ -39,27 +39,48 @@ def kl_divergence(top_words_fake, top_words_real, dict_fake, dict_real):
 
     #print(top_words_fake)
 
+    dict_kl_per_word = dict()
+
     sum_fn = 0
     for word, freq, prob in top_words_fake:
 
         #calculate KL(F||N)
         if word in dict_real:
-            print("for KL(F||N) -> F(i): ", dict_fake.get(word)[1])
-            print("for KL(F||N) -> N(i): ", dict_real.get(word)[1])
-            sum_fn +=  dict_fake.get(word)[1] * np.log(dict_fake.get(word)[1] / dict_real.get(word)[1])
-    print("total KL(F||N) = ", sum_fn)
+            # print("for KL(F||N) -> F(i): ", dict_fake.get(word)[1])
+            # print("for KL(F||N) -> N(i): ", dict_real.get(word)[1])
+            kl_word = dict_fake.get(word)[1] * np.log(dict_fake.get(word)[1] / dict_real.get(word)[1])
+            sum_fn +=  kl_word
+
+            # add every word in fake  to kl dict with the corresponding kl_value
+            dict_kl_per_word[word] = kl_word
+
+
+
+
+    print("total KL(F||N) for table 5 = ", sum_fn)
 
     sum_nf = 0
     for word, freq, prob in top_words_real:
 
         #calculate KL(N||F)
         if word in dict_fake:
-            print("for KL(N||F) -> F(i): ", dict_fake.get(word)[1])
-            print("for KL(N||F) -> N(i): ", dict_real.get(word)[1])
-            sum_nf +=  dict_real.get(word)[1] * np.log(dict_real.get(word)[1] / dict_fake.get(word)[1])
+            # print("for KL(N||F) -> F(i): ", dict_fake.get(word)[1])
+            # print("for KL(N||F) -> N(i): ", dict_real.get(word)[1])
+            kl_word = dict_real.get(word)[1] * np.log(dict_real.get(word)[1] / dict_fake.get(word)[1])
+            sum_nf +=  kl_word
 
-    print("total KL(N||F) = ", sum_nf)
+            #check if word exists in dict
+            if word in dict_kl_per_word:
+                # substract to get the delta
+               # print("claims to contain the word ", word, " in dict. So tuple: -> ", dict_kl_per_word[word])
+                print("before the update of existing word in dict_kl ", dict_kl_per_word[word])
+                dict_kl_per_word[word] = dict_kl_per_word.get(word) - kl_word
+                print("after the update of word to dict_kl: ", dict_kl_per_word[word])
+            else:
+                print("should never be here ")
 
+    print("total KL(N||F) for table 5 = ", sum_nf)
+    print("total delta KL for tale 5 = ", float(sum_fn - sum_nf))
 
 
 
