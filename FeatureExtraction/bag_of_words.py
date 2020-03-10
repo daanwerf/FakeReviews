@@ -22,28 +22,6 @@ def make_sentence_array(reader, speller, stop_words, ps):
     return sentences_total, sentences_fake , sentences_real
 
 
-# return all the fake reviews for information gain
-# def make_sentence_array_fake(reader, speller, stop_words, ps):
-#     sentences = []
-#     label, review_text = yelp.get_next_review_and_label(reader)
-#     print(label)
-#     while label == "1":
-#         label, review_text = yelp.get_next_review_and_label(reader)
-#     while label == "0":
-#         sentences.append(sanitize_sentence(review_text, speller, stop_words, ps))
-#         label, review_text = yelp.get_next_review_and_label(reader)
-#
-#     return sentences
-
-#return all the real review for information gain
-# def make_sentence_array_real(reader, speller, stop_words, ps):
-#     sentences = []
-#     label, review_text = yelp.get_next_review_and_label(reader)
-#     while label == "1":
-#         sentences.append(sanitize_sentence(review_text, speller, stop_words, ps))
-#         label, review_text = yelp.get_next_review_and_label(reader)
-#
-#     return sentences
 
 
 # Report: too high max distance -> too large change in words.

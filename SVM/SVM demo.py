@@ -9,7 +9,7 @@ import nltk
 save_features_and_labels = False
 create_new_Samples = True
 sample_amount = 1
-sample_size = 100
+sample_size = 1000
 if create_new_Samples:
     print("creating " + str(sample_amount) + " balanced samples of size " + str(sample_size))
     yelp.create_balanced_samples(sample_amount, sample_size)
@@ -106,9 +106,3 @@ print("Accuracy signmoid kernel:", metrics.accuracy_score(y_test, s_pred))
 print("Precision sigmoid kernel:", metrics.precision_score(y_test, s_pred))
 print("Recall sigmoid kernel:", metrics.recall_score(y_test, s_pred))
 print("--------------------")
-
-##### PREDICTIONS USING POLYNOMIMAL
-# p_pred = polyn.predict(X_test)
-# print("Accuracy polynomial kernel:", metrics.accuracy_score(y_test, p_pred))
-# print("Precision polynomial kernel:", metrics.precision_score(y_test, p_pred))
-# print("Recall polynomial kernel:", metrics.recall_score(y_test, p_pred))
