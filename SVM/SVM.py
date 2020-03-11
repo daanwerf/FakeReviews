@@ -82,7 +82,9 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
 
     print("Initializing BOW environment for " + str(use_feature_set))
     preprocess = make_preprocess_decision_dict(use_feature_set)
-    vectorizer, speller, stop_words, ps, tagger = bow.create_BOW_environment(preprocess, use_sample)
+
+
+    vectorizer, speller, stop_words, ps, tagger, vectorizer_ig_fake, speller_fake, stop_words_fake, ps_fake, words_freq_fake, vectorizer_ig_real, speller_real, stop_words_real, ps_real, words_freq_real= bow.create_BOW_environment(preprocess, use_sample)
 
     print("Creating the feature and label arrays")
     X = np.zeros((sample_size, len(vectorizer.get_feature_names())))
@@ -136,6 +138,7 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
             label, review = yelp.get_next_review_and_label(sample_reader)
             print("Progress: " + str((counter / sample_size) * 100) + "%")
             counter += 1
+
 
     y = np.asarray(y)
     print(X.shape)

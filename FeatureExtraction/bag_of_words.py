@@ -4,16 +4,19 @@ from HelperFunctions import yelp_dataset_functions as yelp
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from FeatureSets import part_of_speech_bigram as bipos, part_of_speech_unigram as unipos, deep_syntax as ds, \
-    part_of_speech_sequence_pattern as posseq
+    part_of_speech_sequence_pattern as posseq, information_gain as ig
 import nltk
 nltk.download('punkt')
 
 # Report: struggles with getting good bipos features
 def make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess):
     sentences = []
+    sentences_real = []
+    sentences_fake = []
     counter = 0
 
     label, review_text = yelp.get_next_review_and_label(reader)
+
     while label != "-1":
         sanitized_sentence = sanitize_sentence(review_text, speller, stop_words, ps, preprocess)
 
@@ -29,12 +32,20 @@ def make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess):
             sentences.append(ds.get_bigram_and_deep_syntax_feature(review_text, speller, stop_words, ps, preprocess))
         elif preprocess['posseq']:
             sentences.append(posseq.get_POS_sequence(review_text, tagger, speller, stop_words, ps, preprocess))
+        elif preprocess['information_gain']:
+            if label == "1":
+                sentences_real.append(sanitized_sentence)
+                sentences.append(sanitized_sentence)
+            else:
+                sentences_fake.append(sanitized_sentence)
+                sentences.append(sanitized_sentence)
+
 
         print("Progress: " + str((counter / 800) * 100) + "%")
         counter += 1
         label, review_text = yelp.get_next_review_and_label(reader)
 
-    return sentences
+    return sentences , sentences_fake, sentences_real
 
 
 # Report: too high max distance -> too large change in words.
@@ -109,13 +120,52 @@ def create_BOW_environment(preprocess, use_sample):
     reader = yelp.get_regular_balanced_sample_reader(use_sample)
 
     print("Training TFIDF vectorizer")
-    sentences = make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess)
+    sentences , fake_sentences , real_sentences = make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess)
     reader.close()
     # Report: Tfidf shows significantly better results than countvector
 
+
+    #For features that needs Tfidf vectorizer
     vectorizer = TfidfVectorizer()
     X = vectorizer.fit_transform(sentences)
 
+    #For information gain that needs countervec
+    vectorizer_ig_fake, speller_fake, stop_words_fake, ps_fake, words_freq_fake = create_fake_sentences_IG(reader, speller, stop_words, ps, fake_sentences)
+    vectorizer_ig_real, speller_real, stop_words_real, ps_real, words_freq_real = create_real_sentences_IG(reader, speller, stop_words, ps, real_sentences)
+
+    return vectorizer, speller, stop_words, ps, tagger, vectorizer_ig_fake, speller_fake, stop_words_fake, ps_fake, words_freq_fake, vectorizer_ig_real, speller_real, stop_words_real, ps_real, words_freq_real
+
     # Report: usage of pipelines
 
-    return vectorizer, speller, stop_words, ps, tagger
+
+
+
+#For ig purposes
+def create_fake_sentences_IG(reader, speller, stop_words, ps, fake_sentences):
+
+    vectorizer = CountVectorizer()
+
+    X_fake = vectorizer.fit_transform(fake_sentences)
+
+    sum_of_words_fake = X_fake.sum(axis=0)
+
+    words_freq_fake = [(word, sum_of_words_fake[0, idx], 0.0) for word, idx in vectorizer.vocabulary_.items()]
+    words_freq_fake = sorted(words_freq_fake, key= lambda x: x[1], reverse=True)
+
+    return vectorizer, speller, stop_words, ps, words_freq_fake
+
+
+#for ig purposes
+def create_real_sentences_IG(reader, speller, stop_words, ps, real_sentences):
+
+    vectorizer = CountVectorizer()
+
+    X_real = vectorizer.fit_transform(real_sentences)
+    sum_of_words_real = X_real.sum(axis=0)
+
+    words_freq_real = [(word, sum_of_words_real[0, idx], 0.0) for word, idx in vectorizer.vocabulary_.items()]
+    words_freq_real = sorted(words_freq_real, key=lambda x: x[1], reverse=True)
+
+
+    return vectorizer, speller, stop_words, ps, words_freq_real
+
