@@ -4,33 +4,41 @@ from HelperFunctions import yelp_dataset_functions as yelp
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from FeatureSets import part_of_speech_bigram as bipos, part_of_speech_unigram as unipos, deep_syntax as ds, \
-    part_of_speech_sequence_pattern as posseq
+    part_of_speech_sequence_pattern as posseq, information_gain as ig
+
 
 # Report: struggles with getting good bipos features
 def make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess):
     sentences = []
     counter = 0
 
-    label, review_text = yelp.get_next_review_and_label(reader)
-    while label != "-1":
-        sanitized_sentence = sanitize_sentence(review_text, speller, stop_words, ps, preprocess)
+    if preprocess['ig1%']:
+        sentences = ig.get_ig_features(0.01, reader, speller, stop_words, ps, preprocess)
 
-        if preprocess['unigram']:
-            sentences.append(sanitized_sentence)
-        elif preprocess['bigram']:
-            sentences.append(bipos.get_bigrams_and_unigrams_of_sentence(sanitized_sentence))
-        elif preprocess['bipos']:
-            sentences.append(bipos.get_bigrams_and_POS_tags_of_sentence(sanitized_sentence, tagger))
-        elif preprocess['unipos']:
-            sentences.append(unipos.get_unigram_POS_tags_of_text(sanitized_sentence, tagger))
-        elif preprocess['deep']:
-            sentences.append(ds.get_bigram_and_deep_syntax_feature(review_text, speller, stop_words, ps, preprocess))
-        elif preprocess['posseq']:
-            sentences.append(posseq.get_POS_sequence(review_text, tagger, speller, stop_words, ps, preprocess))
+    elif preprocess['ig2%']:
+        sentences = ig.get_ig_features(0.02, reader, speller, stop_words, ps, preprocess)
 
-        print("Progress: " + str((counter / 800) * 100) + "%")
-        counter += 1
+    else:
         label, review_text = yelp.get_next_review_and_label(reader)
+        while label != "-1":
+            sanitized_sentence = sanitize_sentence(review_text, speller, stop_words, ps, preprocess)
+
+            if preprocess['unigram']:
+                sentences.append(sanitized_sentence)
+            elif preprocess['bigram']:
+                sentences.append(bipos.get_bigrams_and_unigrams_of_sentence(sanitized_sentence))
+            elif preprocess['bipos']:
+                sentences.append(bipos.get_bigrams_and_POS_tags_of_sentence(sanitized_sentence, tagger))
+            elif preprocess['unipos']:
+                sentences.append(unipos.get_unigram_POS_tags_of_text(sanitized_sentence, tagger))
+            elif preprocess['deep']:
+                sentences.append(ds.get_bigram_and_deep_syntax_feature(review_text, speller, stop_words, ps, preprocess))
+            elif preprocess['posseq']:
+                sentences.append(posseq.get_POS_sequence(review_text, tagger, speller, stop_words, ps, preprocess))
+
+            print("Progress: " + str((counter / 800) * 100) + "%")
+            counter += 1
+            label, review_text = yelp.get_next_review_and_label(reader)
 
     return sentences
 

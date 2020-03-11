@@ -19,7 +19,9 @@ def make_preprocess_decision_dict(use_feature_set):
         'unipos': False,
         'bipos': False,
         'deep': False,
-        'posseq': False
+        'posseq': False,
+        'ig1%': False,
+        'ig2%': False,
     }
 
     if use_feature_set == "unigram":
@@ -52,18 +54,24 @@ def make_preprocess_decision_dict(use_feature_set):
         preprocess['spell_checker'] = False
         preprocess['stemmer'] = False
         preprocess['posseq'] = True
+    elif use_feature_set == "ig1%":
+        preprocess['stop_words'] = True
+        preprocess['spell_checker'] = True
+        preprocess['stemmer'] = False
+        preprocess['ig1%'] = True
+    elif use_feature_set == "ig2%":
+        preprocess['stop_words'] = True
+        preprocess['spell_checker'] = True
+        preprocess['stemmer'] = False
+        preprocess['ig2%'] = True
 
     return preprocess
-
 
 def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, new_sample_amount=1,
                         sample_size=800, use_sample=0):
     if create_new_samples:
         print("creating " + str(new_sample_amount) + " " + review_type + " balanced samples of size " + str(sample_size))
         yelp.create_balanced_samples(review_type, new_sample_amount, sample_size)
-        print("Creating new grammar for new sample " + review_type + "_" + str(use_sample))
-        ds.create_grammar_of_sample(review_type, use_sample)
-
 
     print("Reading " + review_type + " sample file number " + str(use_sample))
     use_sample = 0
@@ -130,6 +138,13 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
             label, review = yelp.get_next_review_and_label(sample_reader)
             print("Progress: " + str((counter / sample_size) * 100) + "%")
             counter += 1
+        elif preprocess['ig1%'] or preprocess['ig2%']:
+            X[counter] = X[counter] + vectorizer.transform(
+                [bow.sanitize_sentence(review, speller, stop_words, ps, preprocess)]
+            )
+            label, review = yelp.get_next_review_and_label(sample_reader)
+            print("Progress: " + str((counter / sample_size) * 100) + "%")
+            counter += 1
 
     y = np.asarray(y)
     print(X.shape)
@@ -186,4 +201,4 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
     print("f1: " + str(average_f1))
 
 
-execute_SVM_process('45stars', 'posseq', create_new_samples=False)
+execute_SVM_process('regular', 'ig1%', create_new_samples=False)
