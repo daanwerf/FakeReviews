@@ -13,6 +13,8 @@ from itertools import islice
 
 
 def kl_divergence(percentage, top_words_fake, top_words_real, dict_fake, dict_real):
+    print(dict_fake)
+    print(dict_real)
     dict_kl_per_word = dict()
 
     # calculate KL(F||N)

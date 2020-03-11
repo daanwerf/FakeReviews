@@ -84,11 +84,19 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
 
     print("Initializing BOW environment for " + str(use_feature_set))
     preprocess = make_preprocess_decision_dict(use_feature_set)
-    vectorizer, speller, stop_words, ps, tagger = bow.create_BOW_environment(preprocess, use_sample)
+    vectorizer, speller, stop_words, ps, tagger = bow.create_BOW_environment(preprocess, use_sample, sample_reader)
 
     print("Creating the feature and label arrays")
     X = np.zeros((sample_size, len(vectorizer.get_feature_names())))
     y = []
+
+    # Get a new reader
+    if review_type == 'regular':
+        sample_reader = yelp.get_regular_balanced_sample_reader(use_sample)
+    elif review_type == '45stars':
+        sample_reader = yelp.get_45stars_balanced_sample_reader(use_sample)
+    elif review_type == '12stars':
+        sample_reader = yelp.get_12stars_balanced_sample_reader(use_sample)
 
     label, review = yelp.get_next_review_and_label(sample_reader)
     counter = 0
@@ -146,6 +154,8 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
             print("Progress: " + str((counter / sample_size) * 100) + "%")
             counter += 1
 
+    sample_reader.close()
+
     y = np.asarray(y)
     print(X.shape)
     print(y.shape)
@@ -201,4 +211,4 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
     print("f1: " + str(average_f1))
 
 
-execute_SVM_process('regular', 'ig1%', create_new_samples=False)
+execute_SVM_process('45stars', 'bigram', create_new_samples=False)

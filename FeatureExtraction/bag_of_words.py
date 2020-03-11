@@ -16,7 +16,7 @@ def make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess):
         sentences = ig.get_ig_features(0.01, reader, speller, stop_words, ps, preprocess)
 
     elif preprocess['ig2%']:
-        sentences = ig.get_ig_features(0.02, reader, speller, stop_words, ps, preprocess)
+        sentences = ig.get_ig_features(0.2, reader, speller, stop_words, ps, preprocess)
 
     else:
         label, review_text = yelp.get_next_review_and_label(reader)
@@ -40,6 +40,7 @@ def make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess):
             counter += 1
             label, review_text = yelp.get_next_review_and_label(reader)
 
+    print(sentences)
     return sentences
 
 
@@ -86,7 +87,7 @@ def sanitize_sentence(sentence, speller, stop_words, ps, preprocess):
     return sentence
 
 
-def create_BOW_environment(preprocess, use_sample):
+def create_BOW_environment(preprocess, use_sample, reader):
     speller = None
     if preprocess['spell_checker']:
         print("Loading speller dictionary")
@@ -111,8 +112,6 @@ def create_BOW_environment(preprocess, use_sample):
     elif preprocess['unipos'] or preprocess['posseq']:
         print("Loading unigram pos tagger")
         tagger = unipos.load_unigram_tagger()
-
-    reader = yelp.get_regular_balanced_sample_reader(use_sample)
 
     print("Training TFIDF vectorizer")
     sentences = make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess)
