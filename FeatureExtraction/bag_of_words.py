@@ -16,7 +16,7 @@ def make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess):
         sentences = ig.get_ig_features(0.01, reader, speller, stop_words, ps, preprocess)
 
     elif preprocess['ig2%']:
-        sentences = ig.get_ig_features(0.2, reader, speller, stop_words, ps, preprocess)
+        sentences = ig.get_ig_features(0.02, reader, speller, stop_words, ps, preprocess)
 
     else:
         label, review_text = yelp.get_next_review_and_label(reader)
