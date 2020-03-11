@@ -246,27 +246,148 @@ def create_4_and_5_star_labeled_fake_and_true_review_dataset_from_source():
     print(total_amount)
 
 
-def get_labeled_review_reader():
+def create_1_and_2_star_labeled_review_dataset_from_source():
+    metadata_file = open('../Reviews/Yelp_Dataset/yelpzip/metadata', newline='', encoding="utf8")
+    review_file = open('../Reviews/Yelp_Dataset/yelpzip/reviewContent', newline='', encoding="utf8")
+
+    outfile = open("../Reviews/Yelp_Dataset/oneAndTwoStarReviews/labeled_review.txt", "w", encoding="utf8")
+
+    metadata_line = metadata_file.readline().split("\t")
+    metadata_id = metadata_line[0]
+    metadata_score = metadata_line[2]
+    metadata_label = metadata_line[3]
+    if metadata_label == "-1":
+        metadata_label = "0"
+
+    review_line = review_file.readline().split("\t")
+    review_id = review_line[0]
+    review_text = review_line[3]
+
+    total_lines = 0
+    while metadata_id == review_id:
+        if metadata_score == "1.0" or metadata_score == "2.0":
+            outfile.write(metadata_label + "\t" + review_text)
+            total_lines += 1
+
+        try:
+            metadata_line = metadata_file.readline().split("\t")
+            metadata_id = metadata_line[0]
+            metadata_score = metadata_line[2]
+            metadata_label = metadata_line[3]
+            if metadata_label == "-1":
+                metadata_label = "0"
+
+            review_line = review_file.readline().split("\t")
+            review_id = review_line[0]
+            review_text = review_line[3]
+
+        except IndexError:
+            break
+            # End of file
+
+    metadata_file.close()
+    review_file.close()
+    outfile.close()
+    print(total_lines)
+
+
+def create_1_and_2_star_labeled_fake_and_true_review_dataset_from_source():
+    metadata_file = open('../Reviews/Yelp_Dataset/yelpzip/metadata', newline='', encoding="utf8")
+    review_file = open('../Reviews/Yelp_Dataset/yelpzip/reviewContent', newline='', encoding="utf8")
+
+    fake_outfile = open("../Reviews/Yelp_Dataset/oneAndTwoStarReviews/labeled_reviews_fake.txt", "w", encoding="utf8")
+    true_outfile = open("../Reviews/Yelp_Dataset/oneAndTwoStarReviews/labeled_reviews_true.txt", "w", encoding="utf8")
+
+    metadata_line = metadata_file.readline().split("\t")
+    metadata_id = metadata_line[0]
+    metadata_score = metadata_line[2]
+    metadata_label = metadata_line[3]
+    if metadata_label == "-1":
+        metadata_label = "0"
+
+    review_line = review_file.readline().split("\t")
+    review_id = review_line[0]
+    review_text = review_line[3]
+
+    fake_amount = 0
+    true_amount = 0
+    total_amount = 0
+
+    while metadata_id == review_id:
+        if metadata_score == "1.0" or metadata_score == "2.0":
+            if metadata_label == "0":
+                fake_outfile.write(metadata_label + "\t" + review_text)
+                fake_amount += 1
+            elif metadata_label == "1":
+                true_outfile.write(metadata_label + "\t" + review_text)
+                true_amount += 1
+
+            total_amount += 1
+
+        try:
+            metadata_line = metadata_file.readline().split("\t")
+            metadata_id = metadata_line[0]
+            metadata_score = metadata_line[2]
+            metadata_label = metadata_line[3]
+            if metadata_label == "-1":
+                metadata_label = "0"
+
+            review_line = review_file.readline().split("\t")
+            review_id = review_line[0]
+            review_text = review_line[3]
+
+        except IndexError:
+            break
+            # End of file
+
+    metadata_file.close()
+    review_file.close()
+    fake_outfile.close()
+    true_outfile.close()
+
+    print(fake_amount)
+    print(true_amount)
+    print(total_amount)
+
+
+def get_regular_labeled_review_reader():
     return open("../Reviews/Yelp_Dataset/allStarReviews/labeled_review.txt", "r", encoding="utf8")
 
 
-def get_labeled_review_fake_reader():
+def get_regular_labeled_review_fake_reader():
     return open("../Reviews/Yelp_Dataset/allStarReviews/labeled_reviews_fake.txt", "r", encoding="utf8")
 
 
-def get_labeled_review_true_reader():
+def get_regular_labeled_review_true_reader():
     return open("../Reviews/Yelp_Dataset/allStarReviews/labeled_reviews_true.txt", "r", encoding="utf8")
 
 
-def get_labeled_review_validation_true_reader():
-    return open("../Reviews/Yelp_Dataset/machineLearningSets/labeled_reviews_validation_true.txt", "r", encoding="utf8")
+def get_45stars_labeled_review_fake_reader():
+    return open("../Reviews/Yelp_Dataset/fourAndFiveStarReviews/labeled_reviews_fake.txt", "r", encoding="utf8")
 
 
-def get_labeled_review_validation_fake_reader():
-    return open("../Reviews/Yelp_Dataset/machineLearningSets/labeled_reviews_validation_fake.txt", "r", encoding="utf8")
+def get_45stars_labeled_review_true_reader():
+    return open("../Reviews/Yelp_Dataset/fourAndFiveStarReviews/labeled_reviews_true.txt", "r", encoding="utf8")
 
-def get_balanced_sample_reader(sample_id):
-    return open("../Reviews/Yelp_Dataset/samples/sample_" + str(sample_id) + ".txt", "r", encoding="utf8")
+
+def get_12stars_labeled_review_fake_reader():
+    return open("../Reviews/Yelp_Dataset/oneAndTwoStarReviews/labeled_reviews_fake.txt", "r", encoding="utf8")
+
+
+def get_12stars_labeled_review_true_reader():
+    return open("../Reviews/Yelp_Dataset/oneAndTwoStarReviews/labeled_reviews_true.txt", "r", encoding="utf8")
+
+
+def get_regular_balanced_sample_reader(sample_id):
+    return open("../Reviews/Yelp_Dataset/samples/sample_regular_" + str(sample_id) + ".txt", "r", encoding="utf8")
+
+
+def get_45stars_balanced_sample_reader(sample_id):
+    return open("../Reviews/Yelp_Dataset/samples/sample_45stars_" + str(sample_id) + ".txt", "r", encoding="utf8")
+
+
+def get_12stars_balanced_sample_reader(sample_id):
+    return open("../Reviews/Yelp_Dataset/samples/sample_12stars_" + str(sample_id) + ".txt", "r", encoding="utf8")
 
 
 def get_next_review_and_label(reader):
@@ -292,7 +413,7 @@ def get_next_review_and_label(reader):
 
 def find_class_distribution():
     counter = [0] * 2
-    reader = get_labeled_review_reader()
+    reader = get_regular_labeled_review_reader()
 
     current_label, _ = get_next_review_and_label(reader)
     while True:
@@ -311,7 +432,7 @@ def find_class_distribution():
 
 
 def find_longest_review_length():
-    reader = get_labeled_review_reader()
+    reader = get_regular_labeled_review_reader()
     max_length = 0
 
     current_label, review = get_next_review_and_label(reader)
@@ -330,7 +451,7 @@ def find_longest_review_length():
 
 
 def create_test_set():
-    reader = get_labeled_review_reader()
+    reader = get_regular_labeled_review_reader()
     test_set_out = open("../Reviews/Yelp_Dataset/machineLearningSets/test_set.txt", "w", encoding="utf8")
 
     total_reviews = 608598
@@ -344,14 +465,31 @@ def create_test_set():
     test_set_out.close()
 
 
-def create_balanced_samples(sample_amount, upper_bound):
+def create_balanced_samples(sample_type, sample_amount, upper_bound):
     for i in range(sample_amount):
-        true_reader = get_labeled_review_validation_true_reader()
-        fake_reader = get_labeled_review_validation_fake_reader()
+        if sample_type == "regular":
+            true_reader = get_regular_labeled_review_true_reader()
+            true_review_amount = 528132
+            fake_reader = get_regular_labeled_review_fake_reader()
+            fake_review_amount = 80466
+            sample_outfile = open("../Reviews/Yelp_Dataset/samples/sample_regular_" + str(i) + ".txt", "w",
+                                  encoding="utf8")
+        elif sample_type == "45stars":
+            true_reader = get_45stars_labeled_review_true_reader()
+            true_review_amount = 390511
+            fake_reader = get_45stars_labeled_review_fake_reader()
+            fake_review_amount = 56363
+            sample_outfile = open("../Reviews/Yelp_Dataset/samples/sample_45stars_" + str(i) + ".txt", "w",
+                                  encoding="utf8")
+        elif sample_type == "12stars":
+            true_reader = get_12stars_labeled_review_true_reader()
+            true_review_amount = 60823
+            fake_reader = get_12stars_labeled_review_fake_reader()
+            fake_review_amount = 17762
+            sample_outfile = open("../Reviews/Yelp_Dataset/samples/sample_12stars_" + str(i) + ".txt", "w",
+                                  encoding="utf8")
 
-        sample_outfile = open("../Reviews/Yelp_Dataset/samples/sample_" + str(i) + ".txt", "w", encoding="utf8")
-
-        true_dist, fake_dist = us.perform_undersampling(upper_bound)
+        true_dist, fake_dist = us.perform_undersampling(true_review_amount, fake_review_amount, upper_bound)
 
         amount_true = 0
         amount_fake = 0
