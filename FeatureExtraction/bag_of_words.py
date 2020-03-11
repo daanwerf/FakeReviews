@@ -22,6 +22,7 @@ def make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess):
         label, review_text = yelp.get_next_review_and_label(reader)
         while label != "-1":
             sanitized_sentence = sanitize_sentence(review_text, speller, stop_words, ps, preprocess)
+            print(sanitized_sentence)
 
             if preprocess['unigram']:
                 sentences.append(sanitized_sentence)
@@ -74,7 +75,6 @@ def sanitize_sentence(sentence, speller, stop_words, ps, preprocess):
     if preprocess['stop_words']:
         sentence = ' '.join(s for s in sentence.split() if s not in stop_words)
 
-    # Report: pyspellchecker too slow
     if preprocess['spell_checker']:
         sentence = get_words_from_symspell_lookup(sentence, speller)
 

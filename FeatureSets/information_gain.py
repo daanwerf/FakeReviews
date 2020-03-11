@@ -13,8 +13,6 @@ from itertools import islice
 
 
 def kl_divergence(percentage, top_words_fake, top_words_real, dict_fake, dict_real):
-    print(dict_fake)
-    print(dict_real)
     dict_kl_per_word = dict()
 
     # calculate KL(F||N)
@@ -56,6 +54,7 @@ def kl_divergence(percentage, top_words_fake, top_words_real, dict_fake, dict_re
     dict_kl_per_word = {k: v for k, v in sorted(dict_kl_per_word.items(), key=lambda x: abs(float(x[1])), reverse=True)}
 
     n_items = take(round(percentage * len(dict_kl_per_word)), dict_kl_per_word.items())
+    print(n_items)
 
     # print("first 10 items based on they absolute delta kb: ", n_items)
     result = []
@@ -101,13 +100,11 @@ def find_words_real_and_fake(reader, speller, stop_words, ps, preprocess):
 
         if label == "1":
             for word in sanitized:
-                if word not in real_set:
-                    real_set.append(word)
+                real_set.append(word)
 
         if label == "0":
             for word in sanitized:
-                if word not in fake_set:
-                    fake_set.append(word)
+                fake_set.append(word)
 
         label, review = yelp.get_next_review_and_label(reader)
 
