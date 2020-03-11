@@ -22,7 +22,6 @@ def make_sentence_array(reader, speller, stop_words, ps, tagger, preprocess):
         label, review_text = yelp.get_next_review_and_label(reader)
         while label != "-1":
             sanitized_sentence = sanitize_sentence(review_text, speller, stop_words, ps, preprocess)
-            print(sanitized_sentence)
 
             if preprocess['unigram']:
                 sentences.append(sanitized_sentence)

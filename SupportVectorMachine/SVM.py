@@ -209,6 +209,3 @@ def execute_SVM_process(review_type, use_feature_set, create_new_samples=False, 
 
     average_f1 = np.mean(f1s)
     print("f1: " + str(average_f1))
-
-
-execute_SVM_process('12stars', 'ig2%', create_new_samples=False)
