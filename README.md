@@ -10,3 +10,6 @@ In the main.py file in the folder called main, the function execute_SVM_process(
 The second argument is to select which feature set to use. The options are 'unigram', for unigram features, 'bigram' for bigram features, 'unipos' for unigram part of speech features, 'bipos' for bigram part of speech features, 'ig1%' for top 1% information gain features, 'ig2%' for top 2% information gain features, 'deep' for deep syntax features (NOTE: you will need to have the Stanford CoreNLP server running on port 9500 in order to run deep syntax features) and lastly 'posseq' for part of speech sequence pattern features. 
 
 If the third argument remains unchanged (False), no new sample will be generated and the SVM will be executed on the same balanced sample as the results found in the report. Setting this parameter to True will generate a new balanced sample.
+
+## Contribution
+Please note that the contribution of Naqib can be found in other branches than the master branch. For this look at the commits in the branches 'Daan' and 'IG'
